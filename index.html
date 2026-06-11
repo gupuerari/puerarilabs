@@ -5,9 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Puerari Labs — Embedded Hardware Design</title>
 <meta name="description" content="Embedded hardware & firmware design studio in Curitiba, Brazil. 5+ years of schematic, PCB layout, firmware (STM32, ESP-IDF, CH32V003) and prototype bring-up for low-power IoT, LoRaWAN and music-tech. Working worldwide.">
-
-<!-- ============================================================
--->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20120%20120%22%3E%3Cpath%20d%3D%22M%2068%2C37%20L%2071%2C36%20L%2074%2C36%20L%2077%2C36%20L%2080%2C37%20L%2083%2C37%20L%2086%2C39%20L%2089%2C40%20L%2092%2C42%20L%2094%2C44%20L%2096%2C46%20L%2098%2C48%20L%20100%2C51%20L%20101%2C54%20L%20103%2C57%20L%20103%2C60%20L%20104%2C63%20L%20104%2C66%20L%20104%2C69%20L%20103%2C72%20L%20103%2C75%20L%20101%2C78%20L%20100%2C81%20L%2098%2C84%20L%2096%2C86%20L%2094%2C88%20L%2092%2C90%20L%2089%2C92%20L%2086%2C93%20L%2083%2C95%20L%2080%2C95%20L%2077%2C96%20L%2074%2C96%20L%2071%2C96%20L%2068%2C95%20L%2065%2C95%20L%2062%2C93%20L%2059%2C92%20L%2056%2C90%20L%2056%2C89%20L%2059%2C88%20L%2062%2C87%20L%2064%2C85%20L%2067%2C83%20L%2069%2C81%20L%2071%2C78%20L%2073%2C76%20L%2074%2C73%20L%2075%2C70%20L%2076%2C66%20L%2077%2C63%20L%2077%2C60%20L%2077%2C57%20L%2076%2C54%20L%2075%2C50%20L%2074%2C47%20L%2073%2C45%20L%2071%2C42%20L%2069%2C39%20L%2067%2C37%20Z%22%20fill%3D%22%23161A17%22/%3E%3Ccircle%20cx%3D%2246%22%20cy%3D%2260%22%20r%3D%2226%22%20fill%3D%22none%22%20stroke%3D%22%23161A17%22%20stroke-width%3D%226%22/%3E%3C/svg%3E">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,243 +13,215 @@
 
 <style>
 :root{
-  --paper:#F5F6F3;
-  --ink:#161A17;
-  --mask:#15573D;        /* solder-mask green */
-  --mask-dark:#0F4630;
-  --copper:#A8663B;
-  --line:#D9DDD6;
-  --gray:#676D67;
-  --mono:'IBM Plex Mono', monospace;
-  --sans:'Archivo', sans-serif;
+  --paper:#F5F6F3; --ink:#161A17;
+  --mask:#15573D; --mask-dark:#0F4630;
+  --copper:#A8663B; --line:#D9DDD6; --gray:#676D67;
+  --mono:'IBM Plex Mono', monospace; --sans:'Archivo', sans-serif;
 }
-
 *{margin:0;padding:0;box-sizing:border-box}
-
 html{scroll-behavior:smooth}
 @media (prefers-reduced-motion: reduce){
   html{scroll-behavior:auto}
   *,*::before,*::after{animation:none!important;transition:none!important}
 }
-
-body{
-  font-family:var(--sans);
-  background:var(--paper);
-  color:var(--ink);
-  font-size:17px;
-  line-height:1.6;
-  -webkit-font-smoothing:antialiased;
-}
-
-/* Language toggle mechanics */
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased}
+#scope{position:fixed;inset:0;z-index:-1;pointer-events:none}
 [data-l="pt"]{display:none}
 html[data-lang="pt"] [data-l="pt"]{display:inline}
 html[data-lang="pt"] [data-l="en"]{display:none}
-html[data-lang="pt"] block[data-l],
-[data-l].block{display:none}
-html[data-lang="en"] .block[data-l="en"]{display:block}
-html[data-lang="pt"] .block[data-l="pt"]{display:block}
-html[data-lang="pt"] .block[data-l="en"]{display:none}
-
 a{color:var(--mask);text-decoration:none}
 a:hover{color:var(--mask-dark)}
 a:focus-visible, button:focus-visible{outline:2px solid var(--mask);outline-offset:3px}
-
 .wrap{max-width:1060px;margin:0 auto;padding:0 24px}
+.reveal{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s ease}
+.reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion: reduce){.reveal{opacity:1;transform:none}}
 
-/* ---------- corner fiducials (page signature) ---------- */
-.fiducial{
-  position:fixed;width:22px;height:22px;z-index:50;pointer-events:none;opacity:.85;
+/* coordinate HUD (bottom-left, desktop only) */
+.hud{
+  position:fixed;left:46px;bottom:17px;z-index:50;pointer-events:none;
+  font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--gray);
+  display:flex;align-items:center;gap:7px;
 }
+.hud .blip{width:5px;height:5px;border-radius:50%;background:var(--mask)}
+@media(max-width:720px),(hover:none){.hud{display:none}}
+
+/* corner fiducials */
+.fiducial{position:fixed;width:22px;height:22px;z-index:50;pointer-events:none;opacity:.85}
 .fiducial svg{display:block}
-.fid-tl{top:14px;left:14px}
-.fid-tr{top:14px;right:14px}
-.fid-bl{bottom:14px;left:14px}
-.fid-br{bottom:14px;right:14px}
+.fid-tl{top:14px;left:14px}.fid-tr{top:14px;right:14px}
+.fid-bl{bottom:14px;left:14px}.fid-br{bottom:14px;right:14px}
 @media(max-width:720px){.fiducial{display:none}}
 
-/* ---------- header ---------- */
-header{
-  position:sticky;top:0;z-index:40;
-  background:rgba(245,246,243,.92);
-  backdrop-filter:blur(6px);
-  border-bottom:1px solid var(--line);
-}
-.nav{
-  display:flex;align-items:center;justify-content:space-between;
-  height:60px;
-}
-.wordmark{
-  font-family:var(--mono);font-weight:500;font-size:14px;
-  letter-spacing:.18em;color:var(--ink);
-}
+/* header */
+header{position:sticky;top:0;z-index:40;background:rgba(245,246,243,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+.brand{display:flex;align-items:center;gap:11px}
+.brand svg{display:block}
+.wordmark{font-family:var(--mono);font-weight:500;font-size:14px;letter-spacing:.18em;color:var(--ink)}
 .wordmark .tld{color:var(--copper)}
 .nav-links{display:flex;gap:28px;align-items:center}
-.nav-links a{
-  font-family:var(--mono);font-size:12px;letter-spacing:.08em;
-  color:var(--gray);text-transform:uppercase;
-}
+.nav-links a{font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--gray);text-transform:uppercase;position:relative}
 .nav-links a:hover{color:var(--ink)}
-.lang-btn{
-  font-family:var(--mono);font-size:12px;letter-spacing:.08em;
-  background:none;border:1px solid var(--line);border-radius:3px;
-  padding:5px 10px;cursor:pointer;color:var(--ink);
+.nav-links a::after{
+  content:"";position:absolute;left:0;bottom:-5px;height:1px;width:0;
+  background:var(--copper);transition:width .22s ease;
 }
+.nav-links a:hover::after{width:100%}
+.lang-btn{font-family:var(--mono);font-size:12px;letter-spacing:.08em;background:none;border:1px solid var(--line);border-radius:3px;padding:5px 10px;cursor:pointer;color:var(--ink)}
 .lang-btn:hover{border-color:var(--ink)}
 .lang-btn span.off{color:#B6BBB4}
-@media(max-width:720px){
-  .nav-links a:not(.keep){display:none}
-}
+@media(max-width:720px){.nav-links a:not(.keep){display:none}}
 
-/* ---------- hero ---------- */
+/* hero (+ graticule grid) */
 .hero{padding:110px 0 90px;position:relative}
-.eyebrow{
-  font-family:var(--mono);font-size:12px;letter-spacing:.14em;
-  text-transform:uppercase;color:var(--gray);margin-bottom:28px;
-  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+.hero::before{
+  content:"";position:absolute;inset:30px 0 10px 0;z-index:-1;
+  background-image:radial-gradient(rgba(22,26,23,.075) 1px, transparent 1.3px);
+  background-size:26px 26px;
+  -webkit-mask-image:radial-gradient(90% 90% at 35% 40%, #000 30%, transparent 80%);
+  mask-image:radial-gradient(90% 90% at 35% 40%, #000 30%, transparent 80%);
 }
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gray);margin-bottom:28px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--mask);display:inline-block}
-h1{
-  font-size:clamp(32px,5vw,54px);
-  font-weight:600;line-height:1.14;letter-spacing:-.015em;
-  max-width:720px;
-}
+h1{font-size:clamp(32px,5vw,54px);font-weight:600;line-height:1.14;letter-spacing:-.015em;max-width:720px}
 h1 em{font-style:normal;color:var(--mask)}
-.hero-sub{
-  margin-top:26px;max-width:54ch;font-size:18px;color:#3A403B;
-}
+.hero-sub{margin-top:26px;max-width:54ch;font-size:18px;color:#3A403B}
 .hero-ctas{margin-top:40px;display:flex;gap:14px;flex-wrap:wrap;align-items:center}
-
-.btn{
-  display:inline-flex;align-items:center;gap:10px;
-  font-family:var(--mono);font-size:13.5px;letter-spacing:.04em;
-  padding:14px 22px;border-radius:4px;border:1px solid transparent;
-  transition:background .15s ease,border-color .15s ease;
-}
+.btn{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:13.5px;letter-spacing:.04em;padding:14px 22px;border-radius:4px;border:1px solid transparent;transition:background .15s ease,border-color .15s ease}
 .btn-primary{background:var(--mask);color:#fff}
 .btn-primary:hover{background:var(--mask-dark);color:#fff}
 .btn-ghost{border-color:var(--line);color:var(--ink)}
 .btn-ghost:hover{border-color:var(--ink);color:var(--ink)}
 .btn svg{flex:none}
-
-/* dimension annotation under hero (signature) */
-.dim{
-  margin-top:64px;position:relative;height:34px;max-width:560px;
-  user-select:none;
-}
-.dim .rule{
-  position:absolute;left:0;right:0;top:50%;height:1px;background:var(--copper);
-}
+.dim{margin-top:64px;position:relative;height:34px;max-width:560px;user-select:none}
+.dim .rule{position:absolute;left:0;right:0;top:50%;height:1px;background:var(--copper)}
 .dim .tick{position:absolute;top:calc(50% - 7px);width:1px;height:14px;background:var(--copper)}
 .dim .tick.l{left:0}.dim .tick.r{right:0}
 .dim .arrow{position:absolute;top:50%;width:0;height:0;border-top:3.5px solid transparent;border-bottom:3.5px solid transparent}
 .dim .arrow.l{left:1px;border-right:7px solid var(--copper);transform:translateY(-50%)}
 .dim .arrow.r{right:1px;border-left:7px solid var(--copper);transform:translateY(-50%)}
-.dim .dim-label{
-  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  background:var(--paper);padding:0 12px;
-  font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;color:var(--copper);
-  white-space:nowrap;
-}
+.dim .dim-label{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--paper);padding:0 12px;font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;color:var(--copper);white-space:nowrap}
 
-/* ---------- section scaffolding ---------- */
+/* sections */
 section{padding:84px 0;border-top:1px solid var(--line)}
-.sec-head{
-  display:flex;align-items:baseline;gap:18px;margin-bottom:48px;flex-wrap:wrap;
-}
-.refdes{
-  font-family:var(--mono);font-size:12px;letter-spacing:.12em;
-  color:var(--copper);text-transform:uppercase;
-}
+.sec-head{display:flex;align-items:baseline;gap:18px;margin-bottom:48px;flex-wrap:wrap}
+.refdes{font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--copper);text-transform:uppercase}
 h2{font-size:clamp(24px,3vw,32px);font-weight:600;letter-spacing:-.01em}
 
-/* ---------- work ---------- */
+/* work cards (+ EDA selection corners on hover) */
 .work-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line)}
 @media(max-width:760px){.work-grid{grid-template-columns:1fr}}
-.card{
-  background:var(--paper);padding:34px 30px 30px;
-  display:flex;flex-direction:column;gap:14px;
-  transition:background .15s ease;
-}
+.card{background:var(--paper);padding:34px 30px 30px;display:flex;flex-direction:column;gap:14px;transition:background .15s ease;position:relative}
 .card:hover{background:#EFF1EC}
+.card::before,.card::after{
+  content:"";position:absolute;width:14px;height:14px;opacity:0;transition:opacity .2s ease;
+}
+.card::before{top:8px;left:8px;border-top:2px solid var(--copper);border-left:2px solid var(--copper)}
+.card::after{bottom:8px;right:8px;border-bottom:2px solid var(--copper);border-right:2px solid var(--copper)}
+.card:hover::before,.card:hover::after{opacity:1}
 .card-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .card-num{font-family:var(--mono);font-size:12px;color:var(--gray);letter-spacing:.1em}
 .card-stars{color:var(--copper);letter-spacing:.18em;font-size:12.5px}
 .card h3{font-size:19px;font-weight:600;line-height:1.3}
 .card p{font-size:15px;color:#454B46}
-.stack{
-  margin-top:auto;padding-top:14px;
-  font-family:var(--mono);font-size:11.5px;color:var(--gray);letter-spacing:.04em;
-  line-height:1.9;
-}
+.stack{margin-top:auto;padding-top:14px;font-family:var(--mono);font-size:11.5px;color:var(--gray);letter-spacing:.04em;line-height:1.9}
 .card a.case{font-family:var(--mono);font-size:12.5px;letter-spacing:.05em}
 
-/* ---------- quote ---------- */
-.quote{
-  margin:64px auto 0;max-width:760px;
-  border-left:2px solid var(--mask);padding:6px 0 6px 28px;
-}
+/* quote */
+.quote{margin:64px auto 0;max-width:760px;border-left:2px solid var(--mask);padding:6px 0 6px 28px}
 .quote p{font-size:20px;line-height:1.55;font-weight:400;color:#232824}
-.quote footer{
-  margin-top:18px;font-family:var(--mono);font-size:12px;color:var(--gray);letter-spacing:.06em;
-}
+.quote footer{margin-top:18px;font-family:var(--mono);font-size:12px;color:var(--gray);letter-spacing:.06em}
 .stars{color:var(--copper);letter-spacing:.2em;font-size:13px}
 
-/* ---------- services ---------- */
+/* services */
 .svc-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:28px}
 @media(max-width:760px){.svc-grid{grid-template-columns:1fr}}
-.svc{
-  border:1px solid var(--line);border-radius:5px;padding:32px 28px;
-  display:flex;flex-direction:column;gap:14px;background:#FBFCFA;
-}
+.svc{border:1px solid var(--line);border-radius:5px;padding:32px 28px;display:flex;flex-direction:column;gap:14px;background:#FBFCFA}
 .svc .refdes{font-size:11px}
 .svc h3{font-size:18.5px;font-weight:600}
 .svc p{font-size:15px;color:#454B46}
 .svc ul{list-style:none;margin-top:4px}
-.svc li{
-  font-size:14.5px;color:#454B46;padding:7px 0 7px 20px;position:relative;
-  border-top:1px dashed var(--line);
-}
-.svc li::before{
-  content:"";position:absolute;left:2px;top:14px;width:7px;height:7px;
-  border:1.5px solid var(--mask);border-radius:50%;
-}
-.svc-note{
-  margin-top:36px;border:1px solid var(--line);border-left:3px solid var(--copper);
-  border-radius:4px;padding:20px 24px;background:#FBFCFA;
-  font-size:15px;color:#3A403B;max-width:840px;
-}
+.svc li{font-size:14.5px;color:#454B46;padding:7px 0 7px 20px;position:relative;border-top:1px dashed var(--line)}
+.svc li::before{content:"";position:absolute;left:2px;top:14px;width:7px;height:7px;border:1.5px solid var(--mask);border-radius:50%}
+.svc-note{margin-top:36px;border:1px solid var(--line);border-left:3px solid var(--copper);border-radius:4px;padding:20px 24px;background:#FBFCFA;font-size:15px;color:#3A403B;max-width:840px}
 .svc-note strong{font-weight:600}
 
-/* ---------- bench / about ---------- */
+/* about / bench */
 .about-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:60px;align-items:start}
 @media(max-width:860px){.about-grid{grid-template-columns:1fr;gap:40px}}
 .about p{margin-bottom:18px;color:#2A2F2B}
-.bench{
-  border:1px solid var(--line);border-radius:5px;background:#FBFCFA;overflow:hidden;
-}
-.bench-head{
-  font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;
-  color:var(--gray);padding:14px 22px;border-bottom:1px solid var(--line);
-}
+.bench{border:1px solid var(--line);border-radius:5px;background:#FBFCFA;overflow:hidden}
+.bench-head{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);padding:14px 22px;border-bottom:1px solid var(--line)}
 .bench ul{list-style:none}
-.bench li{
-  padding:13px 22px;font-size:15px;border-bottom:1px solid var(--line);
-  display:flex;justify-content:space-between;gap:12px;align-items:baseline;
-}
+.bench li{padding:13px 22px;font-size:15px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;align-items:baseline}
 .bench li:last-child{border-bottom:none}
 .bench li span.id{font-family:var(--mono);font-size:11px;color:var(--copper);letter-spacing:.08em}
 
-/* ---------- contact ---------- */
+/* gallery: auto-scroll + drag + arrows + lightbox */
+.gallery{padding:64px 0 84px}
+.gallery .sec-head{margin-bottom:36px}
+.marquee{
+  position:relative;border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+}
+.mq-viewport{
+  overflow:hidden;padding:22px 0;cursor:grab;touch-action:pan-y;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent);
+  mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent);
+}
+.mq-viewport.dragging{cursor:grabbing}
+.marquee-track{display:flex;gap:16px;width:max-content;will-change:transform}
+.marquee figure{margin:0;position:relative;flex:none;user-select:none}
+.marquee img{
+  height:250px;width:auto;display:block;border:1px solid var(--line);border-radius:5px;
+  background:#EFF1EC;object-fit:cover;pointer-events:none;
+}
+.marquee figcaption{
+  position:absolute;left:10px;bottom:10px;font-family:var(--mono);font-size:10.5px;
+  letter-spacing:.1em;color:#fff;background:rgba(22,26,23,.62);padding:3px 8px;border-radius:3px;
+}
+.mq-btn{
+  position:absolute;top:50%;transform:translateY(-50%);z-index:6;
+  width:42px;height:42px;border-radius:50%;cursor:pointer;
+  background:rgba(245,246,243,.94);border:1px solid var(--line);color:var(--ink);
+  font-family:var(--mono);font-size:16px;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+  transition:border-color .15s ease;
+}
+.mq-btn:hover{border-color:var(--ink)}
+.mq-prev{left:14px}.mq-next{right:14px}
+@media(max-width:720px){.marquee img{height:175px}.mq-btn{width:36px;height:36px}}
+
+/* lightbox */
+.lb{
+  position:fixed;inset:0;z-index:100;display:none;
+  align-items:center;justify-content:center;background:rgba(22,26,23,.94);
+}
+.lb.open{display:flex}
+.lb img{max-width:90vw;max-height:82vh;border:1px solid rgba(245,246,243,.25);border-radius:4px;background:#000}
+.lb-cap{
+  position:absolute;bottom:26px;left:50%;transform:translateX(-50%);
+  font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:rgba(245,246,243,.85);
+}
+.lb button{
+  position:absolute;background:none;border:1px solid rgba(245,246,243,.35);
+  color:#F5F6F3;width:44px;height:44px;border-radius:50%;cursor:pointer;
+  font-family:var(--mono);font-size:17px;display:flex;align-items:center;justify-content:center;
+  transition:border-color .15s ease;
+}
+.lb button:hover{border-color:#F5F6F3}
+.lb-x{top:22px;right:22px}
+.lb-prev{left:22px;top:50%;transform:translateY(-50%)}
+.lb-next{right:22px;top:50%;transform:translateY(-50%)}
+@media(max-width:720px){
+  .lb-prev{left:10px}.lb-next{right:10px}.lb-x{right:12px}
+}
+
+/* contact */
 .contact{padding-bottom:100px}
-.contact-inner{
-  border:1px solid var(--ink);border-radius:6px;
-  padding:56px 48px;position:relative;background:#FBFCFA;
-}
+.contact-inner{border:1px solid var(--ink);border-radius:6px;padding:56px 48px;position:relative;background:#FBFCFA}
 @media(max-width:720px){.contact-inner{padding:40px 26px}}
-.contact-inner .corner{
-  position:absolute;width:10px;height:10px;border-color:var(--copper);border-style:solid;border-width:0;
-}
+.contact-inner .corner{position:absolute;width:10px;height:10px;border-color:var(--copper);border-style:solid;border-width:0}
 .corner.c1{top:-1px;left:-1px;border-top-width:2px;border-left-width:2px}
 .corner.c2{top:-1px;right:-1px;border-top-width:2px;border-right-width:2px}
 .corner.c3{bottom:-1px;left:-1px;border-bottom-width:2px;border-left-width:2px}
@@ -259,23 +229,37 @@ h2{font-size:clamp(24px,3vw,32px);font-weight:600;letter-spacing:-.01em}
 .contact h2{max-width:22ch}
 .contact .lead{margin-top:16px;max-width:52ch;color:#3A403B}
 .contact-rows{margin-top:36px;display:flex;gap:14px;flex-wrap:wrap}
-.alt-links{
-  margin-top:30px;font-family:var(--mono);font-size:12.5px;letter-spacing:.05em;color:var(--gray);
-  display:flex;gap:24px;flex-wrap:wrap;
+.alt-links{margin-top:30px;font-family:var(--mono);font-size:12.5px;letter-spacing:.05em;color:var(--gray);display:flex;gap:24px;flex-wrap:wrap}
+
+.contact-logo {
+  position: absolute;
+  right: 64px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 450px; 
+  height: auto;
+  opacity: 1; 
+  pointer-events: none; 
 }
 
-/* ---------- footer ---------- */
-footer.site{
-  border-top:1px solid var(--line);padding:26px 0 34px;
-  font-family:var(--mono);font-size:11.5px;color:var(--gray);letter-spacing:.06em;
-  display:block;
+
+@media(max-width: 860px) {
+  .contact-logo {
+    display: none;
+  }
 }
-.foot-row{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+/* footer */
+footer.site{border-top:1px solid var(--line);padding:26px 0 34px;font-family:var(--mono);font-size:11.5px;color:var(--gray);letter-spacing:.06em;display:block}
+.foot-row{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center}
+.foot-brand{display:flex;align-items:center;gap:9px}
 </style>
 </head>
 <body>
 
-<!-- corner fiducials -->
+<canvas id="scope" aria-hidden="true"></canvas>
+<div class="hud" id="hud" aria-hidden="true"><span class="blip"></span><span id="hudTxt">X 0000 · Y 0000</span></div>
+
 <div class="fiducial fid-tl" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 22 22"><circle cx="11" cy="11" r="6" fill="none" stroke="#A8663B" stroke-width="1.2"/><line x1="11" y1="0" x2="11" y2="22" stroke="#A8663B" stroke-width="1"/><line x1="0" y1="11" x2="22" y2="11" stroke="#A8663B" stroke-width="1"/></svg></div>
 <div class="fiducial fid-tr" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 22 22"><circle cx="11" cy="11" r="6" fill="none" stroke="#A8663B" stroke-width="1.2"/><line x1="11" y1="0" x2="11" y2="22" stroke="#A8663B" stroke-width="1"/><line x1="0" y1="11" x2="22" y2="11" stroke="#A8663B" stroke-width="1"/></svg></div>
 <div class="fiducial fid-bl" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 22 22"><circle cx="11" cy="11" r="6" fill="none" stroke="#A8663B" stroke-width="1.2"/><line x1="11" y1="0" x2="11" y2="22" stroke="#A8663B" stroke-width="1"/><line x1="0" y1="11" x2="22" y2="11" stroke="#A8663B" stroke-width="1"/></svg></div>
@@ -283,7 +267,10 @@ footer.site{
 
 <header>
   <div class="wrap nav">
-    <div class="wordmark">PUERARI<span class="tld">·</span>LABS</div>
+    <a class="brand" href="#" aria-label="Puerari Labs">
+      <img src="img/logo-header.svg" alt="Puerari Labs" height="32" width="auto">
+    </a>
+    
     <nav class="nav-links" aria-label="Main">
       <a href="#work"><span data-l="en">Work</span><span data-l="pt">Projetos</span></a>
       <a href="#services"><span data-l="en">Services</span><span data-l="pt">Serviços</span></a>
@@ -305,19 +292,15 @@ footer.site{
     <span data-l="en">Embedded hardware design · Curitiba, Brazil · Working worldwide</span>
     <span data-l="pt">Design de hardware embarcado · Curitiba, Brasil · Atendimento global</span>
   </p>
-
   <h1>
     <span data-l="en">Embedded hardware, <em>from first idea to tested board</em>.</span>
     <span data-l="pt">Hardware embarcado, <em>da primeira ideia à placa testada</em>.</span>
   </h1>
-
   <p class="hero-sub">
     <span data-l="en">Schematic, PCB layout, firmware and prototype bring-up for low-power IoT, LoRaWAN and music-tech. 5+ years turning ideas into boards that go to production — not just into a .zip file.</span>
     <span data-l="pt">Esquemático, layout de PCB, firmware e bring-up de protótipos para IoT de baixo consumo, LoRaWAN e music-tech. Mais de 5 anos transformando ideias em placas que vão para produção — não apenas para um arquivo .zip.</span>
   </p>
-
   <div class="hero-ctas">
-    
     <a class="btn btn-primary" href="https://wa.me/5541992839292?text=Hi%20Gustavo%2C%20I%20found%20Puerari%20Labs%20and%20I%27d%20like%20to%20talk%20about%20a%20hardware%20project." target="_blank" rel="noopener">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.9-1.4A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-2.9.8.8-2.8-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.6-6.1c-.3-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1-.2.3-.7.8-.8 1-.1.2-.3.2-.6.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4 0-.5.1-.7l.5-.6c.1-.2.1-.3 0-.5l-.8-1.9c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.3-.9.9-.9 2.2s.9 2.5 1.1 2.7c.1.2 1.9 2.9 4.6 4 .6.3 1.1.4 1.5.6.6.2 1.2.2 1.6.1.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2-.1-.1-.2-.2-.5-.3Z"/></svg>
       <span data-l="en">Talk on WhatsApp</span><span data-l="pt">Falar no WhatsApp</span>
@@ -326,31 +309,24 @@ footer.site{
       <span data-l="en">See the work ↓</span><span data-l="pt">Ver projetos ↓</span>
     </a>
   </div>
-
-  <!-- dimension-line signature -->
   <div class="dim" aria-hidden="true">
     <span class="rule"></span>
     <span class="tick l"></span><span class="tick r"></span>
     <span class="arrow l"></span><span class="arrow r"></span>
-    <span class="dim-label">REV A · EST. 2026 · TOL. ±0.05</span>
+    <span class="dim-label">REV C · EST. 2026 · TOL. ±0.05</span>
   </div>
 </div>
 
 <!-- ================= WORK ================= -->
 <section id="work">
-  <div class="wrap">
+  <div class="wrap reveal">
     <div class="sec-head">
       <span class="refdes">SHT 1 / 4 — <span data-l="en">Selected work</span><span data-l="pt">Projetos selecionados</span></span>
       <h2><span data-l="en">Boards that left the lab</span><span data-l="pt">Placas que saíram do laboratório</span></h2>
     </div>
-
     <div class="work-grid">
-
       <article class="card">
-        <div class="card-top">
-          <span class="card-num">01</span>
-          <span class="card-stars" title="5/5">★★★★★</span>
-        </div>
+        <div class="card-top"><span class="card-num">01</span><span class="card-stars" title="5/5">★★★★★</span></div>
         <h3><span data-l="en">LoRaWAN Sports Scoring System</span><span data-l="pt">Sistema LoRaWAN de placar esportivo</span></h3>
         <p>
           <span data-l="en">Three-tier system for live court-side score tracking on tennis and padel courts: battery-powered controller with multi-month runtime, dual-connectivity gateway and on-screen display integration.</span>
@@ -359,12 +335,8 @@ footer.site{
         <div class="stack">STM32L0 · SX1262 · ESP32-S3 · ESP32-C3 · W5500</div>
         <a class="case" href="https://github.com/gupuerari/hardware-portfolio/blob/main/01-lorawan-sports-scoring" target="_blank" rel="noopener"><span data-l="en">Read case study →</span><span data-l="pt">Ler case study →</span></a>
       </article>
-
       <article class="card">
-        <div class="card-top">
-          <span class="card-num">02</span>
-          <span class="card-stars" title="5/5">★★★★★</span>
-        </div>
+        <div class="card-top"><span class="card-num">02</span><span class="card-stars" title="5/5">★★★★★</span></div>
         <h3><span data-l="en">MIDI to I²C Controller</span><span data-l="pt">Controlador MIDI para I²C</span></h3>
         <p>
           <span data-l="en">Compact controller board converting MIDI 1.0 input to I²C output for integration with embedded host systems. Delivered ahead of schedule for a European music-tech client.</span>
@@ -373,12 +345,8 @@ footer.site{
         <div class="stack">MIDI 1.0 · I²C · <span data-l="en">enclosure-fit design</span><span data-l="pt">design para enclosure</span></div>
         <a class="case" href="https://github.com/gupuerari/hardware-portfolio/blob/main/02-midi-i2c-controller" target="_blank" rel="noopener"><span data-l="en">Read case study →</span><span data-l="pt">Ler case study →</span></a>
       </article>
-
       <article class="card">
-        <div class="card-top">
-          <span class="card-num">03</span>
-          <span class="card-stars" title="5/5">★★★★★</span>
-        </div>
+        <div class="card-top"><span class="card-num">03</span><span class="card-stars" title="5/5">★★★★★</span></div>
         <h3><span data-l="en">M.2 Modular Keyboard Pedal Platform</span><span data-l="pt">Plataforma modular M.2 para pedais de teclado</span></h3>
         <p>
           <span data-l="en">Hardware platform built on the M.2 form factor for musical keyboard pedal modules — main carrier board plus expansion modules including Wi-Fi (ESP32-P4) and FPGA-based options.</span>
@@ -387,12 +355,8 @@ footer.site{
         <div class="stack">M.2 · ESP32-P4 · FPGA</div>
         <a class="case" href="https://github.com/gupuerari/hardware-portfolio/blob/main/03-m2-pedal-platform" target="_blank" rel="noopener"><span data-l="en">Read case study →</span><span data-l="pt">Ler case study →</span></a>
       </article>
-
       <article class="card">
-        <div class="card-top">
-          <span class="card-num">04</span>
-          <span class="card-stars" title="5/5">★★★★★</span>
-        </div>
+        <div class="card-top"><span class="card-num">04</span><span class="card-stars" title="5/5">★★★★★</span></div>
         <h3><span data-l="en">IoT Lock for Sports Courts</span><span data-l="pt">Fechadura IoT para quadras esportivas</span></h3>
         <p>
           <span data-l="en">Integration board combining an electromagnetic lock, ESP32 module and I²C display for access control — deployed in the same facility ecosystem as project 01.</span>
@@ -401,7 +365,6 @@ footer.site{
         <div class="stack">ESP32 · I²C · <span data-l="en">access control</span><span data-l="pt">controle de acesso</span></div>
         <a class="case" href="https://github.com/gupuerari/hardware-portfolio/blob/main/04-iot-court-lock" target="_blank" rel="noopener"><span data-l="en">Read case study →</span><span data-l="pt">Ler case study →</span></a>
       </article>
-
     </div>
 
     <blockquote class="quote">
@@ -420,14 +383,12 @@ footer.site{
 
 <!-- ================= SERVICES ================= -->
 <section id="services">
-  <div class="wrap">
+  <div class="wrap reveal">
     <div class="sec-head">
       <span class="refdes">SHT 2 / 4 — <span data-l="en">Services</span><span data-l="pt">Serviços</span></span>
       <h2><span data-l="en">Four ways to work together</span><span data-l="pt">Quatro formas de trabalhar comigo</span></h2>
     </div>
-
     <div class="svc-grid">
-
       <div class="svc">
         <span class="refdes">SVC-01</span>
         <h3><span data-l="en">Hardware Consulting & Review</span><span data-l="pt">Consultoria & Revisão de Hardware</span></h3>
@@ -442,7 +403,6 @@ footer.site{
           <li><span data-l="en">DFM and component-availability check</span><span data-l="pt">Checagem de DFM e disponibilidade de componentes</span></li>
         </ul>
       </div>
-
       <div class="svc">
         <span class="refdes">SVC-02</span>
         <h3><span data-l="en">PCB Design Sprint</span><span data-l="pt">Sprint de design de PCB</span></h3>
@@ -457,7 +417,6 @@ footer.site{
           <li><span data-l="en">Custom symbols & footprints, datasheet-validated</span><span data-l="pt">Símbolos e footprints próprios, validados em datasheet</span></li>
         </ul>
       </div>
-
       <div class="svc">
         <span class="refdes">SVC-03</span>
         <h3><span data-l="en">Firmware Development</span><span data-l="pt">Desenvolvimento de Firmware</span></h3>
@@ -472,7 +431,6 @@ footer.site{
           <li><span data-l="en">Drivers, protocols and low-power tuning</span><span data-l="pt">Drivers, protocolos e otimização de consumo</span></li>
         </ul>
       </div>
-
       <div class="svc">
         <span class="refdes">SVC-04</span>
         <h3><span data-l="en">Prototype Bring-up & Test</span><span data-l="pt">Bring-up e teste de protótipos</span></h3>
@@ -486,9 +444,7 @@ footer.site{
           <li><span data-l="en">Functional test plan + written test report</span><span data-l="pt">Plano de testes funcionais + relatório por escrito</span></li>
         </ul>
       </div>
-
     </div>
-
     <div class="svc-note">
       <span data-l="en"><strong>For companies in Brazil:</strong> I also run the full turnkey route — design, prototype sourcing and import, bench inspection, rework, functional testing and delivery of working boards with a test report. You never touch customs paperwork.</span>
       <span data-l="pt"><strong>Para empresas no Brasil:</strong> também opero o ciclo turnkey completo — design, compra e importação dos protótipos, inspeção em bancada, retrabalho, testes funcionais e entrega das placas funcionando, com relatório de testes. Você não encosta na burocracia de importação.</span>
@@ -498,12 +454,11 @@ footer.site{
 
 <!-- ================= BENCH / ABOUT ================= -->
 <section id="about">
-  <div class="wrap">
+  <div class="wrap reveal">
     <div class="sec-head">
       <span class="refdes">SHT 3 / 4 — <span data-l="en">The engineer & the bench</span><span data-l="pt">O engenheiro e a bancada</span></span>
       <h2><span data-l="en">Designed by hand, measured by instrument</span><span data-l="pt">Projetado à mão, medido por instrumento</span></h2>
     </div>
-
     <div class="about-grid">
       <div class="about">
         <p>
@@ -519,7 +474,6 @@ footer.site{
           <span data-l="pt">Aberto a projetos de LoRaWAN, BLE e IoT de baixo consumo no mundo todo.</span>
         </p>
       </div>
-
       <div class="bench">
         <div class="bench-head"><span data-l="en">Bench inventory</span><span data-l="pt">Inventário da bancada</span></div>
         <ul>
@@ -533,13 +487,47 @@ footer.site{
   </div>
 </section>
 
+<!-- ================= GALLERY ================= -->
+<section id="gallery" class="gallery">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="refdes">FIG. — <span data-l="en">From the bench</span><span data-l="pt">Direto da bancada</span></span>
+      <h2><span data-l="en">Renders, boards and the lab</span><span data-l="pt">Renders, placas e o laboratório</span></h2>
+    </div>
+  </div>
+  <div class="marquee">
+    <button class="mq-btn mq-prev" id="mqPrev" aria-label="Previous">←</button>
+    <div class="mq-viewport" id="mqView">
+      <div class="marquee-track" id="mqTrack">
+        <figure><img src="img/photo-01.jpg" alt="Hardware photo 1" loading="lazy" draggable="false"><figcaption>FIG. 01</figcaption></figure>
+        <figure><img src="img/photo-02.jpg" alt="Hardware photo 2" loading="lazy" draggable="false"><figcaption>FIG. 02</figcaption></figure>
+        <figure><img src="img/photo-03.jpg" alt="Hardware photo 3" loading="lazy" draggable="false"><figcaption>FIG. 03</figcaption></figure>
+        <figure><img src="img/photo-04.jpg" alt="Hardware photo 4" loading="lazy" draggable="false"><figcaption>FIG. 04</figcaption></figure>
+        <figure><img src="img/photo-05.jpg" alt="Hardware photo 5" loading="lazy" draggable="false"><figcaption>FIG. 05</figcaption></figure>
+        <figure><img src="img/photo-06.jpg" alt="Hardware photo 6" loading="lazy" draggable="false"><figcaption>FIG. 06</figcaption></figure>
+        <figure><img src="img/photo-07.jpg" alt="Hardware photo 7" loading="lazy" draggable="false"><figcaption>FIG. 07</figcaption></figure>
+      </div>
+    </div>
+    <button class="mq-btn mq-next" id="mqNext" aria-label="Next">→</button>
+  </div>
+</section>
+
+<!-- lightbox -->
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Image viewer">
+  <button class="lb-x" id="lbClose" aria-label="Close">✕</button>
+  <button class="lb-prev" id="lbPrev" aria-label="Previous">←</button>
+  <img id="lbImg" src="" alt="">
+  <button class="lb-next" id="lbNext" aria-label="Next">→</button>
+  <div class="lb-cap" id="lbCap"></div>
+</div>
+
 <!-- ================= CONTACT ================= -->
 <section id="contact" class="contact">
-  <div class="wrap">
+  <div class="wrap reveal">
     <div class="contact-inner">
       <span class="corner c1" aria-hidden="true"></span><span class="corner c2" aria-hidden="true"></span>
       <span class="corner c3" aria-hidden="true"></span><span class="corner c4" aria-hidden="true"></span>
-
+      <img src="img/favicon.png" class="contact-logo" alt="" aria-hidden="true">
       <span class="refdes">SHT 4 / 4 — <span data-l="en">Contact</span><span data-l="pt">Contato</span></span>
       <h2 style="margin-top:14px">
         <span data-l="en">Have a board in mind? Let's talk it through.</span>
@@ -549,7 +537,6 @@ footer.site{
         <span data-l="en">Send a short description of what you're building. I'll reply with honest first impressions on feasibility, rough effort and the right next step — no commitment.</span>
         <span data-l="pt">Mande uma descrição curta do que você está construindo. Respondo com uma primeira impressão honesta sobre viabilidade, esforço estimado e o próximo passo certo — sem compromisso.</span>
       </p>
-
       <div class="contact-rows">
         <a class="btn btn-primary" href="https://wa.me/5541992839292?text=Hi%20Gustavo%2C%20I%20found%20Puerari%20Labs%20and%20I%27d%20like%20to%20talk%20about%20a%20hardware%20project." target="_blank" rel="noopener">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.9-1.4A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-2.9.8.8-2.8-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.6-6.1c-.3-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1-.2.3-.7.8-.8 1-.1.2-.3.2-.6.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4 0-.5.1-.7l.5-.6c.1-.2.1-.3 0-.5l-.8-1.9c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.3-.9.9-.9 2.2s.9 2.5 1.1 2.7c.1.2 1.9 2.9 4.6 4 .6.3 1.1.4 1.5.6.6.2 1.2.2 1.6.1.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2-.1-.1-.2-.2-.5-.3Z"/></svg>
@@ -557,7 +544,6 @@ footer.site{
         </a>
         <a class="btn btn-ghost" href="mailto:hello@puerarilabs.com">hello@puerarilabs.com</a>
       </div>
-
       <div class="alt-links">
         <a href="https://github.com/gupuerari" target="_blank" rel="noopener">GitHub ↗</a>
         <a href="https://www.linkedin.com/in/gustavo-puerari-araujo" target="_blank" rel="noopener">LinkedIn ↗</a>
@@ -571,32 +557,248 @@ footer.site{
 
 <footer class="site">
   <div class="wrap foot-row">
-    <span>PUERARI·LABS — <span data-l="en">Embedded Hardware Design</span><span data-l="pt">Design de Hardware Embarcado</span></span>
-    <span>Curitiba, PR — Brasil · <span data-l="en">UTC−3</span><span data-l="pt">UTC−3</span></span>
+    <span class="foot-brand">
+      <svg width="18" height="18" viewBox="0 0 120 120" aria-hidden="true"><path d="M 68,37 L 71,36 L 74,36 L 77,36 L 80,37 L 83,37 L 86,39 L 89,40 L 92,42 L 94,44 L 96,46 L 98,48 L 100,51 L 101,54 L 103,57 L 103,60 L 104,63 L 104,66 L 104,69 L 103,72 L 103,75 L 101,78 L 100,81 L 98,84 L 96,86 L 94,88 L 92,90 L 89,92 L 86,93 L 83,95 L 80,95 L 77,96 L 74,96 L 71,96 L 68,95 L 65,95 L 62,93 L 59,92 L 56,90 L 56,89 L 59,88 L 62,87 L 64,85 L 67,83 L 69,81 L 71,78 L 73,76 L 74,73 L 75,70 L 76,66 L 77,63 L 77,60 L 77,57 L 76,54 L 75,50 L 74,47 L 73,45 L 71,42 L 69,39 L 67,37 Z" fill="#676D67"/><circle cx="46" cy="60" r="26" fill="none" stroke="#676D67" stroke-width="6"/></svg>
+      <span>PUERARI·LABS — <span data-l="en">Embedded Hardware Design</span><span data-l="pt">Design de Hardware Embarcado</span></span>
+    </span>
+    <span>Curitiba, PR — Brasil · UTC−3</span>
   </div>
 </footer>
 
 <script>
+/* ---------- language toggle ---------- */
 (function(){
   var html = document.documentElement;
   var btn  = document.getElementById('langToggle');
   var en   = document.getElementById('lEn');
   var pt   = document.getElementById('lPt');
-
-  // Default: PT for Brazilian visitors, EN for everyone else
   var nav = (navigator.language || 'en').toLowerCase();
   setLang(nav.indexOf('pt') === 0 ? 'pt' : 'en');
-
   btn.addEventListener('click', function(){
     setLang(html.getAttribute('data-lang') === 'en' ? 'pt' : 'en');
   });
-
   function setLang(l){
     html.setAttribute('data-lang', l);
     html.setAttribute('lang', l === 'pt' ? 'pt-BR' : 'en');
     en.classList.toggle('off', l !== 'en');
     pt.classList.toggle('off', l !== 'pt');
   }
+})();
+
+/* ---------- oscilloscope wave background ---------- */
+(function(){
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var c = document.getElementById('scope');
+  if (!c || reduce){ if(c) c.remove(); return; }
+  var ctx = c.getContext('2d');
+  var W, H;
+  function size(){
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    c.width = W * dpr; c.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  size();
+  window.addEventListener('resize', size);
+  var tx = W * 0.72, ty = H * 0.5, mx = tx, my = ty;
+  window.addEventListener('pointermove', function(e){ tx = e.clientX; ty = e.clientY; }, {passive:true});
+  window.addEventListener('touchmove', function(e){
+    var t = e.touches[0]; if (t){ tx = t.clientX; ty = t.clientY; }
+  }, {passive:true});
+  var t = 0;
+  (function draw(){
+    requestAnimationFrame(draw);
+    t += 0.018;
+    mx += (tx - mx) * 0.07;
+    my += (ty - my) * 0.07;
+    ctx.clearRect(0, 0, W, H);
+    var base = H * 0.66;
+    ctx.beginPath();
+    for (var px = 0; px <= W; px += 3){
+      var d   = (px - mx) / 150;
+      var env = Math.exp(-d * d);
+      var idle  = Math.sin(px * 0.012 - t * 2.1) * 6;
+      var burst = Math.sin(px * 0.055 - t * 6.5) * 48 * env;
+      var pull  = (my - base) * 0.14 * env;
+      var y = base + idle + burst + pull;
+      px === 0 ? ctx.moveTo(px, y) : ctx.lineTo(px, y);
+    }
+    ctx.strokeStyle = 'rgba(168,102,59,0.22)';
+    ctx.lineWidth = 1.4;
+    ctx.stroke();
+    var yd = base + Math.sin(mx * 0.012 - t * 2.1) * 6
+                  + Math.sin(mx * 0.055 - t * 6.5) * 48
+                  + (my - base) * 0.14;
+    ctx.beginPath();
+    ctx.arc(mx, yd, 2.5, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(21,87,61,0.45)';
+    ctx.fill();
+  })();
+})();
+
+/* ---------- coordinate HUD ---------- */
+(function(){
+  var hud = document.getElementById('hudTxt');
+  if (!hud) return;
+  var pending = false;
+  window.addEventListener('pointermove', function(e){
+    if (pending) return;
+    pending = true;
+    requestAnimationFrame(function(){
+      hud.textContent = 'X ' + String(Math.round(e.clientX)).padStart(4,'0') +
+                        ' · Y ' + String(Math.round(e.clientY)).padStart(4,'0');
+      pending = false;
+    });
+  }, {passive:true});
+})();
+
+/* ---------- gallery: auto-scroll + drag + arrows + lightbox ---------- */
+(function(){
+  var section = document.getElementById('gallery');
+  var view  = document.getElementById('mqView');
+  var track = document.getElementById('mqTrack');
+  if (!section || !view || !track) return;
+
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var srcs = [], caps = [];
+
+  var imgs = Array.prototype.slice.call(track.querySelectorAll('img'));
+  var pending = imgs.length, started = false;
+
+  imgs.forEach(function(img){
+    img.addEventListener('error', function(){
+      var f = img.closest('figure'); if (f) f.remove();
+      done();
+    });
+    img.addEventListener('load', done);
+    if (img.complete && img.naturalWidth > 0) done();
+  });
+  /* safety net: start anyway after 4s (slow connections) */
+  setTimeout(function(){ if (!started && track.children.length) start(); }, 4000);
+
+  function done(){
+    pending--;
+    if (pending <= 0 && !started) start();
+  }
+
+  var totalW = 0, offset = 0, target = null, dragging = false, pauseUntil = 0;
+
+  function start(){
+    started = true;
+    var figs = Array.prototype.slice.call(track.querySelectorAll('figure'));
+    if (figs.length === 0){ section.style.display = 'none'; return; }
+    figs.forEach(function(f, i){
+      f.dataset.idx = i;
+      var im = f.querySelector('img');
+      srcs.push(im.getAttribute('src'));
+      caps.push((f.querySelector('figcaption') || {textContent:''}).textContent);
+    });
+    /* duplicate twice for seamless loop */
+    track.innerHTML += track.innerHTML;
+    requestAnimationFrame(function(){
+      totalW = track.scrollWidth / 2;
+      loop(performance.now());
+    });
+  }
+
+  var last = 0;
+  function loop(now){
+    requestAnimationFrame(loop);
+    var dt = Math.min((now - last) / 1000, 0.05); last = now;
+    if (target !== null){
+      offset += (target - offset) * 0.12;
+      if (Math.abs(target - offset) < 0.5){ offset = target; target = null; }
+    } else if (!dragging && !reduce && now > pauseUntil){
+      offset += 26 * dt;            /* auto-scroll speed px/s */
+    }
+    if (totalW > 0){
+      var x = ((offset % totalW) + totalW) % totalW;
+      track.style.transform = 'translateX(' + (-x) + 'px)';
+    }
+  }
+
+  /* arrows */
+  function nudge(dir){
+    pauseUntil = performance.now() + 4500;
+    var step = Math.min(view.clientWidth * 0.65, 420);
+    target = (target === null ? offset : target) + dir * step;
+  }
+  document.getElementById('mqPrev').addEventListener('click', function(){ nudge(-1); });
+  document.getElementById('mqNext').addEventListener('click', function(){ nudge(1); });
+
+  /* drag + click-to-expand */
+  var startX = 0, startOffset = 0, moved = 0, downTarget = null;
+  view.addEventListener('pointerdown', function(e){
+    dragging = true; moved = 0;
+    startX = e.clientX; startOffset = offset;
+    downTarget = e.target;
+    target = null;
+    pauseUntil = performance.now() + 4500;
+    view.classList.add('dragging');
+    view.setPointerCapture(e.pointerId);
+  });
+  view.addEventListener('pointermove', function(e){
+    if (!dragging) return;
+    var dx = e.clientX - startX;
+    moved = Math.max(moved, Math.abs(dx));
+    offset = startOffset - dx;
+  });
+  function up(e){
+    if (!dragging) return;
+    dragging = false;
+    view.classList.remove('dragging');
+    pauseUntil = performance.now() + 4500;
+    if (moved < 7 && downTarget){
+      var f = downTarget.closest ? downTarget.closest('figure') : null;
+      if (f && f.dataset.idx !== undefined) openLb(parseInt(f.dataset.idx, 10) % srcs.length);
+    }
+  }
+  view.addEventListener('pointerup', up);
+  view.addEventListener('pointercancel', up);
+
+  /* lightbox */
+  var lb = document.getElementById('lb');
+  var lbImg = document.getElementById('lbImg');
+  var lbCap = document.getElementById('lbCap');
+  var cur = 0;
+  function openLb(i){
+    cur = i; render();
+    lb.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLb(){
+    lb.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  function render(){
+    lbImg.src = srcs[cur];
+    lbCap.textContent = caps[cur] + '  ·  ' + (cur+1) + ' / ' + srcs.length;
+  }
+  function step(d){ cur = (cur + d + srcs.length) % srcs.length; render(); }
+  document.getElementById('lbClose').addEventListener('click', closeLb);
+  document.getElementById('lbPrev').addEventListener('click', function(){ step(-1); });
+  document.getElementById('lbNext').addEventListener('click', function(){ step(1); });
+  lb.addEventListener('click', function(e){ if (e.target === lb) closeLb(); });
+  document.addEventListener('keydown', function(e){
+    if (!lb.classList.contains('open')) return;
+    if (e.key === 'Escape') closeLb();
+    if (e.key === 'ArrowLeft') step(-1);
+    if (e.key === 'ArrowRight') step(1);
+  });
+})();
+
+/* ---------- scroll reveal ---------- */
+(function(){
+  if (!('IntersectionObserver' in window)) {
+    document.querySelectorAll('.reveal').forEach(function(el){ el.classList.add('in'); });
+    return;
+  }
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, {threshold: 0.08});
+  document.querySelectorAll('.reveal').forEach(function(el){ io.observe(el); });
 })();
 </script>
 
